@@ -6,6 +6,10 @@ use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
+use frontend\models\Bulletin;
+use frontend\models\Comment;
+use frontend\models\Profile;
+use frontend\models\Image;
 
 /**
  * User model
@@ -32,6 +36,33 @@ class User extends ActiveRecord implements IdentityInterface
     public static function tableName()
     {
         return '{{%user}}';
+    }
+
+
+    public function getOwnComments()
+    {
+        return $this->hasMany(Comment::className(), ['user_id' => 'id']);
+    }
+
+    public function getComments()
+    {
+        return $this->hasMany(Comment::className(), ['whom_id' => 'id']);
+    }
+
+    public function getProfile()
+    {
+        return $this->hasOne(Profile::className(), ['user_id' => 'id']);
+    }
+
+    public function getBulletins()
+    {
+        return $this->hasMany(Bulletin::className(), ['user_id' => 'id']);
+    }
+
+    public function getImage()
+    {
+        return $this->hasOne(Image::className(), ['id' => 'image_id'])
+            ->viaTable(Profile::tableName(), ['user_id'=>'id']);
     }
 
     /**

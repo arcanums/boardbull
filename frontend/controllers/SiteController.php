@@ -7,11 +7,14 @@ use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
 use frontend\models\ContactForm;
+use frontend\models\Bulletin;
+use frontend\models\Profile;
 use yii\base\InvalidParamException;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\data\Pagination;
 
 /**
  * Site controller
@@ -72,7 +75,22 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $query = Bulletin::find();
+
+        $pagination = new Pagination([
+            'defaultPageSize' => 10,
+            'totalCount' => $query->count(),
+        ]);
+
+        $bulletins = $query->orderBy(['created_at'=>SORT_DESC])
+            ->offset($pagination->offset)
+            ->limit($pagination->limit)
+            ->all();
+
+        return $this->render('index', [
+            'bulletins' => $bulletins,
+            'pagination' => $pagination,
+        ]);
     }
 
     /**
@@ -107,6 +125,8 @@ class SiteController extends Controller
 
         return $this->goHome();
     }
+
+
 
     /**
      * Displays contact page.
@@ -153,6 +173,7 @@ class SiteController extends Controller
             if ($user = $model->signup()) {
                 if (Yii::$app->getUser()->login($user)) {
                     return $this->goHome();
+                    //return Yii::$app->redirect('profile/edit');
                 }
             }
         }
